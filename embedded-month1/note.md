@@ -642,29 +642,134 @@ scanf("%s")、gets 等函数不限制输入长度
 功能：
 
 - 输入 10 个数
+
 - 用指针求和、求平均值
+
+  ```
+  int main()
+  {
+      int arr[10];
+      int *p=arr;
+      int sum=0;
+      float avg;
+      
+      printf("请输入10个数字:\n");
+      for (int i = 0; i < 10; i++)
+      {
+          scanf("%d",&p[i]);
+          sum += p[i]; 
+      }
+      avg=(float)sum/10.0;
+      printf("和为：%d,平均值为：%.2f",sum,avg);
+      
+      return 0;
+  }
+  ```
+
+  ​
 
 #### 2. 用函数交换两个数
 
 要求：
 
 - 普通写法
+
 - 指针写法（交换成功）
+
+  ```
+  void swap(int a, int b)
+  {
+      int temp=a;
+      a=b;
+      b=temp;
+  }
+
+  void swap_ptr(int *a,int *b){
+      int temp =*a;
+      *a=*b;
+      *b=temp;
+  }
+
+  int main()
+  {
+      int x=10,y=20;
+      printf("交换前：x=%d, y=%d\n", x, y);
+      swap(x,y);
+      printf("普通交换后：x=%d, y=%d\n", x, y);
+      swap_ptr(&x,&y);
+      printf("指针交换后：x=%d, y=%d\n", x, y);
+
+      return 0;
+  }
+  ```
+
+  ​
 
 #### 3. 二维数组打印
 
 要求：
 
 - 普通索引方式
+
 - 指针方式访问
+
+  ```
+  int main()
+  {
+      int arr[3][4] = {
+          {1, 2, 3, 4},
+          {5, 6, 7, 8},
+          {9, 10, 11, 12}
+      };
+      printf("普通索引方式打印二维数组：\n");
+      for (int i = 0; i < 3; i++)
+      {
+          for (int j = 0; j < 4; j++)
+          {
+              printf("%d ", arr[i][j]);
+          }
+          printf("\n");
+      }
+      printf("指针方式访问二维数组：\n");
+      int *p = arr[0];
+      for (int i = 0; i < 12; i++)
+      {
+          printf("%d ", *(p + i));
+      }
+      printf("\n");
+      return 0;
+  }
+  ```
 
 ------
 
 ### 今天必须能回答
 
 - 为什么函数里交换变量需要传地址
+
+  ```
+  C 语言默认是「值传递」，函数里改的只是副本，只有传地址才能修改原变量本身。
+  ```
+
+  ​
+
 - 数组名为什么经常表现得像指针
+
+  ```
+  数组名在大多数场景下，会被编译器隐式转换成「数组首元素的地址」，所以用法和指针几乎一样。
+  ```
+
+  ​
+
 - `*p++` 和 `(*p)++` 区别是什么
+
+  ```
+  算符优先级不同，++ 优先级高于 *，括号会改变运算顺序。
+  ① *p++：先取值，再移动指针
+  ② (*p)++：先取值，再让值自增
+  ```
+
+  ​
 
 ------
 
@@ -675,3 +780,158 @@ scanf("%s")、gets 等函数不限制输入长度
 - swap
 - 数组遍历
 - 指针访问二维数组
+
+## 第 2 天：二级指针 + 指针进阶
+
+今天继续把指针吃透。
+
+------
+
+### 今天学什么
+
+重点：
+
+- 二级指针
+- 指针作为函数参数
+- 字符串指针
+- 命令行参数概念（先知道）
+
+------
+
+### 今天写的代码
+
+### 1. 动态创建二维数组（简化版）
+
+用：
+
+- `malloc`
+
+- 二级指针
+
+  ```
+  #include <stdio.h>
+  #include <stdlib.h>
+  // 1. 动态创建二维数组（简化版）
+  // 用：
+  // - malloc
+  // - 二级指针
+  void createArray(int ***arr,int row,int col){
+      *arr=(int**)malloc(row*sizeof(int*));
+      if (*arr == NULL)
+      {
+          printf("内存分配失败！\n");
+          exit(1);
+      }
+      for(int i=0;i<row;i++){
+          (*arr)[i]=(int*)malloc(col*sizeof(int));
+          if ((*arr)[i] == NULL)
+          {
+              printf("内存分配失败！\n");
+              exit(1);
+          }
+      }
+  }
+  void freeArray(int **arr,int row){
+      for(int i=0;i<row;i++){
+          free(arr[i]);
+      }
+      free(arr);
+  }
+  int main()
+  {
+      int **arr;
+      int row=3,col=4;
+      createArray(&arr,row,col);
+      for(int i=0;i<row;i++){
+          for(int j=0;j<col;j++){
+              arr[i][j]=i*col+j+1;
+          }
+      }
+      printf("动态创建的二维数组：\n");
+      for(int i=0;i<row;i++){
+          for(int j=0;j<col;j++){
+              printf("%d ",arr[i][j]);
+          }
+          printf("\n");
+      }
+      return 0;
+  }
+  ```
+
+  ​
+
+### 2. 字符串数组排序
+
+例如：
+
+- apple
+- banana
+- cat
+
+按字典序排序。
+
+```
+{
+    char *arr[]={"apple","bannan","cat"};
+    int n=sizeof(arr)/sizeof(arr[0]);
+    for(int i=0;i<n-1;i++){
+        for (int j = 0; j < n-1-i; j++)
+        {
+            if (strcmp(arr[j],arr[j+1])>0)
+            {
+                char *temp=arr[j];
+                arr[j]=arr[j+1];
+                arr[j+1]=temp;
+            }
+        }
+    }
+    printf("排序后的字符串数组：\n");
+    for(int i=0;i<n;i++){
+        printf("%s\n",arr[i]);
+    }
+    return 0;
+}
+```
+
+
+
+------
+
+### 今天必须理解
+
+- 为什么二级指针存在
+
+  ```
+  为了在函数里修改一级指针本身。
+  规则：要修改谁，就传谁的地址
+  修改普通 int 变量 → 传 int*（一级指针）
+  修改 int* 指针变量 → 传 int**（二级指针）
+  ```
+
+- `char *p` 和 `char arr[]` 区别
+
+  ```
+  一个是指针变量，一个是字符数组；一个指向常量区，一个存在栈上。
+  ```
+
+  | 特性         | `char *p = "hello";`             | `char arr[] = "hello";`                  |
+  | ------------ | -------------------------------- | ---------------------------------------- |
+  | 存储位置     | 字符串在常量区，p 在栈上         | 整个字符串都在栈上                       |
+  | 能否修改内容 | ❌ 不能！修改会崩溃（常量区只读） | ✅ 可以，比如 `arr[0]='H'`                |
+  | 能否修改指向 | ✅ 可以，比如 `p = "world";`      | ❌ 不可以，arr 是常量                     |
+  | 内存大小     | 仅占一个指针的大小（4/8 字节）   | 占字符串长度 + 1（含 '\0'，比如 6 字节） |
+
+------
+
+### 今日验收
+
+你能看懂这种定义：
+
+```
+int **p;
+   p 是一个「二级指针」，它指向一个「一级指针」，而那个一级指针最终指向一个 int 变量。
+char *str[];
+  str 是一个「数组」，数组里的每个元素都是一个「char* 类型的指针」，也就是指针数组。
+```
+
+别小看这个，很多初学者会在这卡很久。
