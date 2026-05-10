@@ -9,7 +9,7 @@
 
 int main()
 {
-        int *arr = (int*)malloc(5 * sizeof(int));
+    int *arr = (int*)malloc(5 * sizeof(int));
     if (arr == NULL)
     {
         printf("ÄÚ´æ·ÖÅäÊ§°Ü\n");
